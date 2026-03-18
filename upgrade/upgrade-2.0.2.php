@@ -17,13 +17,10 @@
  * @copyright Since 2007 PrestaShop SA and Contributors
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License 3.0 (AFL-3.0)
  */
-
 /**
  * @param Module $module
- *
- * @return bool
  */
-function upgrade_module_2_0_2($module)
+function upgrade_module_2_0_2($module): bool
 {
     $module->unregisterHook('AdminStatsModules');
     $module->registerHook('displayAdminStatsModules');

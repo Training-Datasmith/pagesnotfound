@@ -68,7 +68,10 @@ class PagesNotFound extends Module
         return parent::uninstall() && Db::getInstance()->execute('DROP TABLE `' . _DB_PREFIX_ . 'pagenotfound`');
     }
 
-    private function getPages()
+    /**
+     * @return non-empty-array[]
+     */
+    private function getPages(): array
     {
         $sql = 'SELECT http_referer, request_uri, COUNT(*) as nb
 				FROM `' . _DB_PREFIX_ . 'pagenotfound`
@@ -185,7 +188,7 @@ class PagesNotFound extends Module
         return $this->html;
     }
 
-    public function hookDisplayTop($params)
+    public function hookDisplayTop($params): void
     {
         if (strstr($_SERVER['REQUEST_URI'], '404.php') && isset($_SERVER['REDIRECT_URL'])) {
             $_SERVER['REQUEST_URI'] = $_SERVER['REDIRECT_URL'];
@@ -195,7 +198,7 @@ class PagesNotFound extends Module
         }
 
         if (get_class(Context::getContext()->controller) == 'PageNotFoundController') {
-            $http_referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+            $http_referer = $_SERVER['HTTP_REFERER'] ?? '';
             if (empty($http_referer) || Validate::isAbsoluteUrl($http_referer)) {
                 Db::getInstance()->execute(
                     '
@@ -207,7 +210,7 @@ class PagesNotFound extends Module
         }
     }
 
-    private function _normalizeDirectory($directory)
+    private function _normalizeDirectory(string $directory): string
     {
         $last = $directory[strlen($directory) - 1];
 
@@ -217,17 +220,11 @@ class PagesNotFound extends Module
             return $directory;
         }
 
-        $directory .= DIRECTORY_SEPARATOR;
-
-        return $directory;
+        return $directory . DIRECTORY_SEPARATOR;
     }
 }
 
-function pnfSort($a, $b)
+function pnfSort(array $a, array $b): int
 {
-    if ($a['nb'] == $b['nb']) {
-        return 0;
-    }
-
-    return ($a['nb'] > $b['nb']) ? -1 : 1;
+    return $b['nb'] <=> $a['nb'];
 }
