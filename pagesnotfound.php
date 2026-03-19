@@ -159,9 +159,9 @@ class PagesNotFound extends Module
                         $this->html .= '
                         <tr>
                             <th scope="row"></th>
-                            <td data-header="' . $titlePage . '"><a href="' . $ru . '-admin404">' . wordwrap($ru, 30, '<br />', true) . '</a></td>
-                            <td data-header="' . $titleReferer . '"><a href="' . Tools::getProtocol() . $hr . '">' . wordwrap($hr, 40, '<br />', true) . '</a></td>
-                            <td data-header="' . $titleCounter . '"><span>' . $counter . '</span></td>
+                            <td data-header="' . $titlePage . '"><a href="' . htmlspecialchars($ru, ENT_QUOTES, 'UTF-8') . '-admin404">' . wordwrap(htmlspecialchars($ru, ENT_QUOTES, 'UTF-8'), 30, '<br />', true) . '</a></td>
+                            <td data-header="' . $titleReferer . '"><a href="' . Tools::getProtocol() . htmlspecialchars($hr, ENT_QUOTES, 'UTF-8') . '">' . wordwrap(htmlspecialchars($hr, ENT_QUOTES, 'UTF-8'), 40, '<br />', true) . '</a></td>
+                            <td data-header="' . $titleCounter . '"><span>' . (int) $counter . '</span></td>
                         </tr>';
                     }
                 }
