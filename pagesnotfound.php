@@ -86,7 +86,10 @@ class PagesNotFound extends Module
             if (!isset($pages[$row['request_uri']])) {
                 $pages[$row['request_uri']] = ['nb' => 0];
             }
-            $pages[$row['request_uri']][$row['http_referer']] = $row['nb'];
+            if (!isset($pages[$row['request_uri']][$row['http_referer']])) {
+                $pages[$row['request_uri']][$row['http_referer']] = 0;
+            }
+            $pages[$row['request_uri']][$row['http_referer']] += (int) $row['nb'];
             $pages[$row['request_uri']]['nb'] += $row['nb'];
         }
         uasort($pages, 'pnfSort');
@@ -151,11 +154,13 @@ class PagesNotFound extends Module
             foreach ($pages as $ru => $hrs) {
                 foreach ($hrs as $hr => $counter) {
                     if ($hr != 'nb') {
+                        $escapedRu = htmlspecialchars($ru, ENT_QUOTES, 'UTF-8');
+                        $escapedHr = htmlspecialchars($hr, ENT_QUOTES, 'UTF-8');
                         $this->html .= '
                         <tr>
                             <th scope="row"></th>
-                            <td data-header="' . $titlePage . '"><a href="' . $ru . '-admin404">' . wordwrap($ru, 30, '<br />', true) . '</a></td>
-                            <td data-header="' . $titleReferer . '"><a href="' . Tools::getProtocol() . $hr . '">' . wordwrap($hr, 40, '<br />', true) . '</a></td>
+                            <td data-header="' . $titlePage . '"><a href="' . htmlspecialchars($ru . '-admin404', ENT_QUOTES, 'UTF-8') . '">' . wordwrap($escapedRu, 30, '<br />', true) . '</a></td>
+                            <td data-header="' . $titleReferer . '"><a href="' . Tools::getProtocol() . $escapedHr . '">' . wordwrap($escapedHr, 40, '<br />', true) . '</a></td>
                             <td data-header="' . $titleCounter . '"><span>' . $counter . '</span></td>
                         </tr>';
                     }
