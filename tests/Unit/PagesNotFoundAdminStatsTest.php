@@ -123,6 +123,47 @@ class PagesNotFoundAdminStatsTest extends PagesNotFoundTestCase
         $this->assertSame('5', $rows[0]['counter']);
     }
 
+    public function testEscapesHookInsertedUriAndRefererInMarkup()
+    {
+        $this->setPageNotFoundFrontContext(1, 1);
+        $_SERVER['REQUEST_URI'] = '/a< b>';
+        $_SERVER['HTTP_REFERER'] = 'http://ref.example/a&b';
+
+        $this->module->hookDisplayTop([]);
+
+        $rows = Db::getInstance()->executeS('SELECT request_uri, http_referer FROM `' . _DB_PREFIX_ . 'pagenotfound`');
+        $this->assertCount(1, $rows);
+        $this->assertSame('/a< b>', $rows[0]['request_uri']);
+        $this->assertSame('http://ref.example/a&b', $rows[0]['http_referer']);
+
+        Db::getInstance()->execute(
+            'UPDATE `' . _DB_PREFIX_ . 'pagenotfound` SET date_add = \'2020-06-15 12:00:00\''
+        );
+
+        Context::getContext()->controller = $this->adminController;
+        $_SERVER['REQUEST_URI'] = '/admin/index.php?controller=AdminStats&module=pagesnotfound';
+        $html = $this->module->hookDisplayAdminStatsModules();
+
+        $this->assertSame(
+            1,
+            preg_match(
+                '/<td data-header="Page"><a href="\/a&lt; b&gt;-admin404">\/a&lt; b&gt;<\/a><\/td>/',
+                $html
+            )
+        );
+        $this->assertSame(
+            1,
+            preg_match(
+                '/<td data-header="Referrer"><a href="http:\/\/ref\.example\/a&amp;b">ref\.example\/a&amp;b<\/a><\/td>/',
+                $html
+            )
+        );
+        $this->assertSame(
+            0,
+            preg_match('/<td data-header="Page"><a href="\/a< b>-admin404">\/a< b><\/a><\/td>/', $html)
+        );
+    }
+
     public function testEscapesPageUriInMarkup()
     {
         $this->insertRowWithoutSqlEscape('/<b>pnfmarker</b>', 'http://example.com/a', '2020-06-15 12:00:00');
